@@ -13,19 +13,23 @@ apply repo:
 # Plan all repos (each in isolation)
 plan-all:
     #!/usr/bin/env bash
+    export TF_PLUGIN_CACHE_DIR="/tmp/tofu-plugin-cache"
+    mkdir -p "$TF_PLUGIN_CACHE_DIR"
     for file in repos/*.tfvars; do
         repo=$(basename "$file" .tfvars)
+        export TF_DATA_DIR="/tmp/tofu-$repo"
         tofu init 2>&1
         tofu plan -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.tfvars" 2>&1 || true
-        rm -rf .terraform terraform.tfstate terraform.tfstate.backup
     done
 
 # Sync all repositories (each in isolation)
 sync-all:
     #!/usr/bin/env bash
+    export TF_PLUGIN_CACHE_DIR="/tmp/tofu-plugin-cache"
+    mkdir -p "$TF_PLUGIN_CACHE_DIR"
     for file in repos/*.tfvars; do
         repo=$(basename "$file" .tfvars)
+        export TF_DATA_DIR="/tmp/tofu-$repo"
         tofu init 2>&1
         tofu apply -auto-approve -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.tfvars" 2>&1
-        rm -rf .terraform terraform.tfstate terraform.tfstate.backup
     done
