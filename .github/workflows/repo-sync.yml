@@ -31,6 +31,7 @@ jobs:
 
   plan:
     if: github.event_name == 'pull_request'
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -57,6 +58,7 @@ jobs:
 
   apply:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
