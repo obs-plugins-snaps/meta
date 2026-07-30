@@ -3,12 +3,14 @@ name: Repo Reconcilation
 on:
   pull_request:
     paths:
+      - .github/workflows/**
       - profiles/manifest.tfvars
       - modules/repo-template/**
       - repos/*.hcl
   push:
     branches: [main]
     paths:
+      - .github/workflows/**
       - profiles/manifest.tfvars
       - modules/repo-template/**
       - repos/*.hcl
