@@ -19,7 +19,7 @@ plan-all:
         repo=$(basename "$file" .tfvars)
         export TF_DATA_DIR="/tmp/tofu-$repo"
         tofu init 2>&1
-        tofu plan -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.tfvars" 2>&1 || true
+        tofu plan -no-color -state="/tmp/tofu-state-$repo.tfstate" -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.tfvars" 2>&1 || true
     done
 
 # Sync all repositories (each in isolation)
@@ -31,5 +31,5 @@ sync-all:
         repo=$(basename "$file" .tfvars)
         export TF_DATA_DIR="/tmp/tofu-$repo"
         tofu init 2>&1
-        tofu apply -auto-approve -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.tfvars" 2>&1
+        tofu apply -auto-approve -no-color -state="/tmp/tofu-state-$repo.tfstate" -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.tfvars" 2>&1
     done
