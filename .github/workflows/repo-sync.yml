@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       - uses: opentofu/setup-opentofu@v2
       - name: Generate installation token
         id: app-token
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@v4
       - uses: opentofu/setup-opentofu@v2
       - name: Generate installation token
         id: app-token
