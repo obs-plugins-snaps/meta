@@ -5,9 +5,9 @@
 #
 # Adding an item here adds it to every repo (visible in PR plan diff).
 # Removing an item here removes it from every repo (unless the repo
-# declares its own override in repos/<name>.hcl).
+# declares its own override in repos/<name>.tfvars).
 #
-# Per-repo overrides are declared in repos/<name>.hcl.
+# Per-repo overrides are declared in repos/<name>.tfvars.
 # The effective set is: distinct(concat(org_topics, repo_topics))
 
 org_topics = [
