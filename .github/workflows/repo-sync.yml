@@ -1,0 +1,80 @@
+name: Repo Reconcilation
+
+on:
+  pull_request:
+    paths:
+      - profiles/manifest.tfvars
+      - modules/repo-template/**
+      - repos/*.hcl
+  push:
+    branches: [main]
+    paths:
+      - profiles/manifest.tfvars
+      - modules/repo-template/**
+      - repos/*.hcl
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - run: tofu fmt -check
+      - run: tofu init
+      - run: tofu validate -no-color
+
+  plan:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - name: Generate installation token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - run: tofu init
+      - name: Plan changes for changed repos
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |
+          for file in repos/*.hcl; do
+            repo=$(basename "$file" .hcl)
+            echo "::group::Plan for $repo"
+            tofu plan -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.hcl" 2>&1 || true
+            echo "::endgroup::"
+          done
+
+  apply:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+      - name: Generate installation token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.APP_CLIENT_ID }}
+          private-key: ${{ secrets.APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+      - run: tofu init
+      - name: Apply changes to all repos
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_OWNER: ${{ github.repository_owner }}
+        run: |
+          for file in repos/*.hcl; do
+            repo=$(basename "$file" .hcl)
+            echo "::group::Applying to $repo"
+            tofu apply -auto-approve -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.hcl" 2>&1
+            echo "::endgroup::"
+          done
