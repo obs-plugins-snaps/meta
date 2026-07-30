@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v3
       - uses: opentofu/setup-opentofu@v2
       - name: Generate installation token
         id: app-token
@@ -43,18 +44,11 @@ jobs:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-      - run: tofu init
-      - name: Plan changes for changed repos
+      - name: Plan changes for all repos
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
-        run: |
-          for file in repos/*.hcl; do
-            repo=$(basename "$file" .hcl)
-            echo "::group::Plan for $repo"
-            tofu plan -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.hcl" 2>&1 || true
-            echo "::endgroup::"
-          done
+        run: just plan-all
 
   apply:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
@@ -62,6 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v3
       - uses: opentofu/setup-opentofu@v2
       - name: Generate installation token
         id: app-token
@@ -70,15 +65,8 @@ jobs:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
           owner: ${{ github.repository_owner }}
-      - run: tofu init
       - name: Apply changes to all repos
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
-        run: |
-          for file in repos/*.hcl; do
-            repo=$(basename "$file" .hcl)
-            echo "::group::Applying to $repo"
-            tofu apply -auto-approve -no-color -var="repo_name=$repo" -var-file="profiles/manifest.tfvars" -var-file="repos/$repo.hcl" 2>&1
-            echo "::endgroup::"
-          done
+        run: just sync-all
