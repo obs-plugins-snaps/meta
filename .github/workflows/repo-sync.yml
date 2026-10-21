@@ -38,6 +38,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
+          TF_VAR_snapcraft_store_edge_secret: ${{ secrets.SNAPCRAFT_STORE_EDGE }}
         run: just plan-all
 
   apply:
@@ -59,4 +60,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_OWNER: ${{ github.repository_owner }}
+          TF_VAR_snapcraft_store_edge_secret: ${{ secrets.SNAPCRAFT_STORE_EDGE }}
         run: just sync-all
