@@ -8,6 +8,11 @@ import {
   to = module.repo.github_repository_topics.this
 }
 
+import {
+  id = "${var.repo_name}:main"
+  to = module.repo.github_branch_protection.this
+}
+
 module "repo" {
   source = "./modules/repo-template"
 
