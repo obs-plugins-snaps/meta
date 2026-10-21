@@ -27,3 +27,9 @@ resource "github_repository_topics" "this" {
   repository = var.repo_name
   topics     = distinct(concat(var.org_topics, var.repo_topics))
 }
+
+resource "github_actions_secret" "snapcraft_store_edge" {
+  repository      = github_repository.this.name
+  secret_name     = "SNAPCRAFT_STORE_EDGE"
+  plaintext_value = var.snapcraft_store_edge_secret
+}

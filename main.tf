@@ -15,4 +15,6 @@ module "repo" {
   description = var.description
   org_topics  = var.org_topics
   repo_topics = var.repo_topics
+
+  snapcraft_store_edge_secret = var.snapcraft_store_edge_secret
 }
