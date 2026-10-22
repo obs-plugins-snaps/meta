@@ -12,6 +12,7 @@
 
 org_topics = [
   "obs",
+  "obs-plugin-snap",
   "obs-studio",
   "linux",
   "snap",
