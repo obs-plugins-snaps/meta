@@ -11,6 +11,7 @@ check-generated:
     set -euo pipefail
     mkdir -p /tmp/gen-before
     rm -rf /tmp/gen-before/repos
+    [ -d repos ] || { echo "repos/ missing: run 'just gen' and commit the result" >&2; exit 1; }
     cp -a repos /tmp/gen-before/repos
     just gen > /dev/null
     if ! diff -r /tmp/gen-before/repos repos > /dev/null; then
