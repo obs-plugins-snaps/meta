@@ -40,3 +40,6 @@ terraform.rc
 # End of https://www.toptal.com/developers/gitignore/api/terraform
 # Include profiles (shared defaults, not secrets)
 !profiles/*.tfvars
+
+# Include generated per-repo inputs (no secrets, only names and summaries)
+!repos/*.tfvars

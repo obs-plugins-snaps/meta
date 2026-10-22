@@ -1,23 +1,23 @@
 import {
-  id = var.repo_name
+  id = "${var.snap_name}-snap"
   to = module.repo.github_repository.this
 }
 
 import {
-  id = var.repo_name
+  id = "${var.snap_name}-snap"
   to = module.repo.github_repository_topics.this
 }
 
 import {
-  id = "${var.repo_name}:main"
+  id = "${var.snap_name}-snap:main"
   to = module.repo.github_branch_protection.this
 }
 
 module "repo" {
   source = "./modules/repo-template"
 
-  repo_name   = var.repo_name
-  description = var.description
+  snap_name   = var.snap_name
+  summary     = var.summary
   org_topics  = var.org_topics
   repo_topics = var.repo_topics
 

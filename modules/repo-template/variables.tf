@@ -1,5 +1,12 @@
-variable "repo_name" {
-  type = string
+variable "snap_name" {
+  description = "Snapcraft package name; the repository name is derived as '<snap_name>-snap'."
+  type        = string
+}
+
+variable "summary" {
+  description = "One-line summary, used as the GitHub repository description."
+  type        = string
+  default     = ""
 }
 
 variable "default_branch" {

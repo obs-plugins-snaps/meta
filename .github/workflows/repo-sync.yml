@@ -14,8 +14,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - uses: extractions/setup-just@v4
       - uses: opentofu/setup-opentofu@v2
+      - uses: astral-sh/setup-uv@v6
       - run: tofu fmt -check
+      - run: just check-generated
       - run: tofu init
       - run: tofu validate -no-color
 
