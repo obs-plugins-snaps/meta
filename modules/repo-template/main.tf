@@ -1,7 +1,12 @@
+locals {
+  repo_name = "${var.snap_name}-snap"
+}
+
 resource "github_repository" "this" {
-  name        = var.repo_name
-  description = var.description
-  visibility  = "public"
+  name         = local.repo_name
+  description  = var.summary
+  homepage_url = "https://snapcraft.io/${var.snap_name}"
+  visibility   = "public"
 
   has_issues              = true
   has_discussions         = false
@@ -24,7 +29,7 @@ resource "github_branch_protection" "this" {
 }
 
 resource "github_repository_topics" "this" {
-  repository = var.repo_name
+  repository = local.repo_name
   topics     = distinct(concat(var.org_topics, var.repo_topics))
 }
 

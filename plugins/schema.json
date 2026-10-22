@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/obs-plugins-snaps/meta/main/plugins/schema.json",
+  "title": "Plugin record",
+  "description": "Creation-time record for one OBS Studio plugin packaged as a snap. This is the single source of truth: scripts/generate.py projects each record into repos/<snap_name>.tfvars, and the record itself is passed to copier (JSON is valid YAML) together with the .description.md sidecar. Hand-edit the record and the optional sidecar; never edit generated files. The record file must be named <plugin_name>-obs-studio.json: the plugin name is derived by stripping the -obs-studio suffix.",
+  "type": "object",
+  "required": ["summary", "license"],
+  "additionalProperties": false,
+  "properties": {
+    "source_url": {
+      "type": "string",
+      "format": "uri",
+      "description": "Where the plugin source comes from: upstream Git repository (with optional .git suffix). Feeds the snap's 'source' field and the copier template's source_url question. Optional: redistributable runtimes (e.g. proprietary SDKs fetched at build time) have no upstream source URL and omit it."
+    },
+    "website": {
+      "type": "string",
+      "format": "uri",
+      "description": "Public-facing page shown as the snap's 'website' in the store listing: project homepage, OBS forums thread, or custom site. For source-hosted plugins it usually equals source_url with the .git suffix stripped; when omitted, the copier template applies that default from source_url. Required for source-less packages (enforced below)."
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 78,
+      "description": "One-line summary. Used as the snap's 'summary', the GitHub repository description, and the README headline."
+    },
+    "license": {
+      "type": "string",
+      "description": "SPDX license identifier of the plugin (e.g. GPL-2.0, MIT). Use 'Proprietary' for non-free runtime libraries."
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 78,
+      "description": "Optional override for the snap's 'title' field. Defaults to '{plugin_name} (OBS plugin)' with dashes replaced by spaces and words capitalized; set it when that casing is wrong (e.g. acronyms like DistroAV)."
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "not": { "required": ["source_url"] }
+      },
+      "then": { "required": ["website"] }
+    }
+  ]
+}

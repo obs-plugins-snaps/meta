@@ -1,0 +1,6 @@
+{
+  "source_url": "https://github.com/DistroAV/DistroAV.git",
+  "summary": "NDI integration for OBS Studio",
+  "license": "GPL-2.0",
+  "title": "DistroAV (OBS NDI plugin)"
+}
