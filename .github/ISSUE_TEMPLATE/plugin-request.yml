@@ -1,0 +1,59 @@
+name: Plugin request
+description: Request an OBS Studio plugin to be packaged as a snap
+title: "[plugin] "
+labels: ["plugin-request"]
+body:
+  - type: checkboxes
+    id: not-already-requested
+    attributes:
+      label: First check
+      options:
+        - label: >-
+            I have checked that this plugin has not been requested already in
+            [meta issues](https://github.com/obs-plugins-snaps/meta/issues?q=is%3Aissue+label%3Aplugin-request)
+          required: true
+  - type: input
+    id: plugin-name
+    attributes:
+      label: Plugin name
+      description: Name of the plugin as used upstream
+      placeholder: e.g. Source Record
+    validations:
+      required: true
+  - type: input
+    id: link
+    attributes:
+      label: Link to the plugin page
+      description: OBS forums thread or upstream repository
+      placeholder: e.g. https://obsproject.com/forum/resources/... or https://github.com/...
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Brief description
+      description: What does the plugin do? We could fetch this ourselves, but helping us saves a round-trip.
+    validations:
+      required: false
+  - type: textarea
+    id: usage
+    attributes:
+      label: How are you using this plugin?
+      description: Optional — your workflows and features you care about help us test the snap.
+    validations:
+      required: false
+  - type: textarea
+    id: install-now
+    attributes:
+      label: How do you install this plugin now?
+      description: Optional — manual .so copy, Debian package, Flatpak, ...
+    validations:
+      required: false
+  - type: markdown
+    attributes:
+      value: |
+        ### Help us prioritize
+
+        Vouch for plugin requests (yours included!) by reacting with 👍 on
+        the issue — reaction counts are the main signal we use to decide
+        what gets packaged next.
