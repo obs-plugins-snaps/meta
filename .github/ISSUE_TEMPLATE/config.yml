@@ -1,0 +1,10 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Obs Plugins snaps organization
+    url: https://github.com/orgs/obs-plugins-snaps
+    about: Repository map, contributing guide, and security policy
+  - name: Packaging bug in an installed snap
+    url: https://github.com/orgs/obs-plugins-snaps/repositories
+    about: >-
+      If a plugin snap is broken (installation, connection to OBS Studio,
+      missing plugin), open an issue in that snap's repository instead.
