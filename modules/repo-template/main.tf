@@ -26,6 +26,17 @@ resource "github_branch_protection" "this" {
 
   # Signatures are required for everyone, including administrators.
   enforce_admins = true
+
+  # Require pull requests before merging, but do not require any
+  # approving review: with required_approving_review_count = 0, merging
+  # is unimpeded unless a collaborator submits a review requesting
+  # changes, which then blocks the merge until that same collaborator
+  # approves or dismisses the review. Requiring one or more approvals
+  # would instead deadlock solo work, since GitHub forbids approving
+  # one's own pull request.
+  required_pull_request_reviews {
+    required_approving_review_count = 0
+  }
 }
 
 resource "github_repository_topics" "this" {
