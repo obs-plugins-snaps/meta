@@ -1,0 +1,114 @@
+# Staging checks: the mergeability gate for staging PRs.
+#
+# A staging PR stages one plugin: a record under plugins/ plus a
+# template-rendered tree under staging/<plugin_name>/. The checks are all
+# deterministic gates (T1 in the flow's terms):
+#
+# - lint: policy lint of record + rendered snapcraft.yaml
+#   (scripts/staging_lint.py)
+# - store-name: the snap name must still be unregistered (anti-squat;
+#   scripts/store_name_available.py; anonymous API, no credentials)
+# - build: pack the staged snapcraft.yaml in place (canonical/craft-
+#   actions/snapcraft/pack supports a `path`), uploading the artifact
+#   under the same <plugin_name>-snap name build-snap.yml uses, so the
+#   shared e2e-smoke workflow can consume it unchanged
+# - e2e: smoke-test the exact artifact from the build job, pointing the
+#   shared workflow at staging/<plugin_name>/tests/e2e (the template
+#   renders the suite into the staging tree). Store-independent by
+#   design: sideload + connect, no store identity involved.
+#
+# Building from the staging tree (not a repo root) is deliberate: it is
+# the exact tree graduation will later push as the repo's first commit -
+# test what you ship.
+#
+# The record-side schema validation and `just check-generated` freshness
+# are enforced by the Repo Reconcilation workflow, which already runs on
+# every pull request.
+
+name: Staging checks
+
+on:
+  pull_request:
+    paths:
+      - "plugins/**"
+      - "staging/**"
+
+permissions: {}
+
+jobs:
+  lint:
+    name: Staging policy lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+
+      - run: uv run scripts/staging_lint.py
+
+  # Exactly one staged plugin per PR keeps the wrapper contract simple;
+  # detect fails loudly otherwise.
+  detect:
+    name: Detect staged plugin
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      plugin_name: ${{ steps.names.outputs.plugin_name }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: names
+        run: |
+          names=$(find staging -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
+          if [ -z "$names" ]; then
+            echo "No staging directory: nothing to check (cleanup PR?)." >&2
+            exit 0
+          fi
+          count=$(printf '%s\n' "$names" | wc -l)
+          if [ "$count" -ne 1 ]; then
+            echo "A staging PR must stage exactly one plugin; found $count: $names" >&2
+            exit 1
+          fi
+          echo "plugin_name=$names" >> "$GITHUB_OUTPUT"
+
+  store-name:
+    name: Snap name available
+    if: needs.detect.outputs.plugin_name != ''
+    needs: detect
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: astral-sh/setup-uv@v7
+
+      - run: uv run scripts/store_name_available.py "${{ needs.detect.outputs.plugin_name }}-obs-studio"
+
+  build:
+    name: Pack staged snap
+    if: needs.detect.outputs.plugin_name != ''
+    needs: detect
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: canonical/craft-actions/snapcraft/pack@main
+        id: pack
+        with:
+          path: staging/${{ needs.detect.outputs.plugin_name }}
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ${{ needs.detect.outputs.plugin_name }}-snap
+          path: ${{ steps.pack.outputs.snaps }}
+
+  e2e:
+    name: E2E smoke test
+    if: needs.detect.outputs.plugin_name != ''
+    needs: [detect, build]
+    uses: obs-plugins-snaps/workflows/.github/workflows/e2e-smoke.yml@main
+    with:
+      plugin_name: ${{ needs.detect.outputs.plugin_name }}
+      tests_path: staging/${{ needs.detect.outputs.plugin_name }}/tests/e2e
